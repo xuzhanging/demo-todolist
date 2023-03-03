@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDoList</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        header{
+            margin: 10px auto;
+            width: 40%;
+        }
+        label{
+            width: 30%;
+            text-align: center;
+        }
+        input{
+            padding-left: 5px;
+        }
+        #title{
+            width: 70%;
+        }
+        section{
+            width: 33%;
+            margin-left: 30%;
+        }
+        ul,ol{
+            width: 100%;
+        }
+        li{
+            width: 100%;
+            height: 20px;
+            list-style: none;
+        }
+        a{
+            text-decoration: none;
+        }
+        ul li{
+            background-color: pink;
+        }
+        ol li{
+            background-color: skyblue;
+        }
+    </style>
+    <script src="./jquery.min.js"></script>
+</head>
+<body>
+    <header>
+        <label for="">ToDoList</label>
+        <input type="text" placeholder="添加ToDo" id="title">
+    </header>
+    <section>
+        <h2>正在进行
+            <span id="todocount"></span>
+        </h2>
+        <ol id="todolist">
+        </ol>
+        <h2>已经完成
+            <span id="donecount"></span>
+        </h2>
+        <ul id="donelist">
+        </ul>
+    </section>
+    <script>
+        $(function() {
+            load();
+            $("#title").on("keydown", function(event) {
+                if(event.keyCode == 13) {
+                    if($(this).val() === "") {
+                        alert("请输入待完成的事件");
+                    } else {
+                        var local = getData();
+                        local.push({
+                            title: $(this).val(),
+                            done: false
+                        });
+                        saveData(local);
+                        load();
+                        $(this).val("");
+                    }
+                }
+            })
+            $("ol, ul").on("click", "a", function() {
+                var data = getData();
+                var index = $(this).attr("id");
+                data.splice(index, 1);
+                saveData(data);
+                load();
+            })
+            $("ol, ul").on("click", "input", function() {
+                var data = getData();
+                data[$(this).siblings("a").attr("id")].done = $(this).prop("checked");
+                saveData(data);
+                load();
+            })
+            function getData() {
+                var data = window.localStorage.getItem("todolist");
+                if(data != null) {
+                    return JSON.parse(data);
+                } else {
+                    return [];
+                }
+            }
+            function saveData(data) {
+                window.localStorage.setItem("todolist", JSON.stringify(data));
+            }
+            function load() {
+                var data = getData();
+                $("ol, ul").empty();
+                var todoCount = 0;
+                var doneCount = 0;
+                $.each(data, function(i, n) {
+                    if(n.done) {
+                        doneCount++;
+                        $("ul").prepend("<li><input type='checkbox' checked='checked'><span>" + n.title + "</span><a href='javascript:;' id= '" + i + "'>×</a></li>");
+                    } else {
+                        todoCount++;
+                        $("ol").prepend("<li><input type='checkbox'><span>" + n.title + "</span><a href='javascript:;' id= '" + i + "'>×</a></li>");
+                    }
+                })
+                $("#todocount").text(todoCount);
+                $("#donecount").text(doneCount);
+            }
+        })
+    </script>
+</body>
+</html>
